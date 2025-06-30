@@ -6,7 +6,7 @@ A desktop application for running vegetation classification predictions on aeria
 🔗 **Repository:** [https://github.com/kahlilamin/sar_segmentation_2025_app](https://github.com/kahlilamin/sar_segmentation_2025_app)
 
 
-![Alt text](images\app-screenshot.png)
+![Alt text](images/app-screenshot.png)
 ---
 
 ## 🚀 Features
