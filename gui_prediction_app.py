@@ -95,7 +95,11 @@ class PredictionApp:
         master.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def on_closing(self):
-        if hasattr(self, "prediction_thread") and self.prediction_thread.is_alive():
+        if (
+            hasattr(self, "prediction_thread")
+            and self.prediction_thread is not None
+            and self.prediction_thread.is_alive()
+        ):
             if messagebox.askyesno(
                 "Exit", "Prediction is still running. Do you really want to quit?"
             ):
