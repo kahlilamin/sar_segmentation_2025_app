@@ -149,15 +149,15 @@ class PredictionApp:
         email_link.pack()
         email_link.bind("<Button-1>", open_email)
 
-        # Optional website link example
-        def open_website(event):
-            webbrowser.open("https://www.rcflood.org")
+        def open_github(event):
+            webbrowser.open("https://github.com/kahlilamin/sar_segmentation_2025_app")
 
-        website_link = tk.Label(
-            about_win, text="Visit RCFCD Website", fg="blue", cursor="hand2"
+        # GitHub link
+        github_link = tk.Label(
+            about_win, text="GitHub Repository", fg="blue", cursor="hand2"
         )
-        website_link.pack()
-        website_link.bind("<Button-1>", open_website)
+        github_link.pack()
+        github_link.bind("<Button-1>", open_github)
 
         # Close button
         tk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
