@@ -36,6 +36,8 @@ class PredictionApp:
         self.master = master
         master.title(f"Vegetation Prediction App v{__version__}")
 
+        self.pre_trained_models = PRE_TRAINED_MODELS
+
         self.prediction_thread = None
 
         self.input_file = tk.StringVar()
@@ -242,6 +244,19 @@ class PredictionApp:
         def task():
             try:
                 start_time = time.time()
+                # Show loading models status
+                self.master.after(
+                    0,
+                    lambda: [
+                        self.update_status("Loading models..."),
+                        self.progress.config(mode="indeterminate"),
+                        self.progress.start(),
+                    ],
+                )
+
+                # Load models
+                for model in self.pre_trained_models:
+                    model.load()
 
                 # Start reading file
                 self.master.after(
@@ -291,7 +306,7 @@ class PredictionApp:
                         src,
                         profile,
                         prediction_tif,
-                        PRE_TRAINED_MODELS,
+                        self.pre_trained_models,
                         tile_size=256,
                         stride=128,
                         batch_size=self.batch_size.get(),

@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from typing import Union
+from typing import Union, Optional
 from pathlib import Path
 
 tf.get_logger().setLevel("ERROR")
@@ -26,7 +26,23 @@ class PreTrainedModel:
         """
         self.model_path = model_path
 
-        self.model = tf.keras.models.load_model(model_path, compile=False)
+        self._model = None
+
+    def load(self) -> None:
+        if self._model is None:
+            self._model = tf.keras.models.load_model(self.model_path, compile=False)
+
+    @property
+    def model(self) -> Optional[tf.keras.Model]:
+        """
+        Load and return the TensorFlow model.
+
+        Returns:
+            tf.keras.Model: The loaded model.
+        """
+        if self._model is None:
+            self.load()
+        return self._model
 
     def prepare_tile(self, img) -> np.ndarray:
         """
