@@ -236,6 +236,15 @@ class PredictionApp:
         return valid_windows
 
     def run_prediction(self):
+        # Validate input and output paths
+        if not self.input_file.get():
+            messagebox.showerror("Error", "Please select an input raster file.")
+            return
+
+        if not self.output_file.get():
+            messagebox.showerror("Error", "Please specify an output prediction file.")
+            return
+
         def task():
             try:
                 start_time = time.time()
