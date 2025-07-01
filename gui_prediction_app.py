@@ -12,11 +12,14 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from pathlib import Path
 
+import numpy as np
+
 import rasterio
 from rasterio.vrt import WarpedVRT
+
 from generate_prediction import (
     generate_prediction,
-    get_image_transform_profile,
+    get_tiles,
     PRE_TRAINED_MODELS,
 )
 
@@ -219,6 +222,22 @@ class PredictionApp:
             messagebox.showerror("Invalid Input", f"Failed to read input raster:\n{e}")
             return False
 
+    def estimate_total_tiles(self, src, tile_size=256, stride=128):
+
+        profile = src.profile.copy()
+
+        total_tiles = 0
+
+        for window, _ in get_tiles(src, tile_size, tile_size, stride):
+            tile_img = src.read(1, window=window)
+
+            if np.all(tile_img == profile["nodata"]):
+                continue
+
+            total_tiles += 1
+
+        return total_tiles
+
     def run_prediction(self):
         def task():
             try:
@@ -242,12 +261,8 @@ class PredictionApp:
                     return  # Abort if invalid
 
                 with rasterio.open(sar_img_tif) as src:
-                    profile = get_image_transform_profile(src=src)
 
-                    # Calculate approximate total_tiles quickly without reading tiles
-                    with WarpedVRT(src, **profile) as vrt:
-                        ncols, nrows = vrt.meta["width"], vrt.meta["height"]
-                        total_tiles = (ncols // 128) * (nrows // 128)
+                    total_tiles = self.estimate_total_tiles(src)
 
                     # Switch to determinate mode
                     self.master.after(
@@ -269,6 +284,8 @@ class PredictionApp:
                         self.master.after(
                             0, lambda: self.progress.config(value=processed_tiles)
                         )
+
+                    profile = src.profile.copy()
 
                     generate_prediction(
                         src,

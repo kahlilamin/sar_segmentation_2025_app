@@ -58,46 +58,6 @@ def reclassify(arr):
     return np.vectorize(reclass_map.get)(arr)
 
 
-def get_image_transform_profile(src):
-    """
-    Generates a transform for cliping tiles out of a rectangular grid.
-    """
-    # from math import sin, radians, cos
-
-    profile = src.profile
-
-    pix_x = abs(profile["transform"][0])
-    pix_y = abs(profile["transform"][4])
-
-    if pix_x != pix_y:
-        raise ValueError("Cell-X and Cell-Y pixel sizes must be the same.")
-
-    clip_width, clip_height, theta = 1536 + 256 * 6, 25344, 53.1987050268
-
-    # width = clip_width * sin(radians(theta)) + clip_height * cos(radians(theta))
-    # y_off = (width - clip_width * sin(radians(theta))) * sin(radians(90-theta))
-    # x_off = (width - clip_width * sin(radians(theta))) * cos(radians(90-theta))
-
-    x_off, y_off = 6210797.25 - src.xy(0, 0)[0], 2322457.25 - src.xy(0, 0)[1]
-
-    x_off, y_off = 1065, -500
-
-    trans = (
-        Affine.rotation(90 - theta)
-        * Affine.translation(xoff=24555 + 250, yoff=-18380 + 250)
-        * Affine.translation(xoff=x_off, yoff=y_off)
-    )
-    profile["transform"] = src.transform * trans
-
-    profile["resampling"] = Resampling.nearest
-
-    # Need to solve for a hieght and width that guarantees tiles fits inside boundary
-    profile["width"] = clip_width / pix_x - 1
-    profile["height"] = clip_height / pix_x + 128
-
-    return profile
-
-
 def get_crop_window(window, crop_amount):
     """
     Return the rasterio window for the current tile.

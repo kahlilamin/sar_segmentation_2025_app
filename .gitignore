@@ -226,3 +226,4 @@ data/tif/sar_ms_2024_merged.tif
 data/tif/sar_ms_2024_merged.tif.ovr
 .vscode/settings.json
 setup_env.bat
+data/tif/
