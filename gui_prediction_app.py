@@ -224,11 +224,11 @@ class PredictionApp:
             messagebox.showerror("Invalid Input", f"Failed to read input raster:\n{e}")
             return False
 
-    def estimate_total_tiles(self, src, tile_size=256, stride=128):
+    def estimate_valid_windows(self, src, tile_size=256, stride=128):
 
         profile = src.profile.copy()
 
-        total_tiles = 0
+        valid_windows = []
 
         for window, _ in get_tiles(src, tile_size, tile_size, stride):
             tile_img = src.read(1, window=window)
@@ -236,9 +236,9 @@ class PredictionApp:
             if np.all(tile_img == profile["nodata"]):
                 continue
 
-            total_tiles += 1
+            valid_windows.append(window)
 
-        return total_tiles
+        return valid_windows
 
     def run_prediction(self):
         def task():
@@ -277,7 +277,8 @@ class PredictionApp:
 
                 with rasterio.open(sar_img_tif) as src:
 
-                    total_tiles = self.estimate_total_tiles(src)
+                    valid_windows = self.estimate_valid_windows(src)
+                    total_tiles = len(valid_windows)
 
                     # Switch to determinate mode
                     self.master.after(
@@ -307,6 +308,7 @@ class PredictionApp:
                         profile,
                         prediction_tif,
                         self.pre_trained_models,
+                        valid_windows,
                         tile_size=256,
                         stride=128,
                         batch_size=self.batch_size.get(),
@@ -324,7 +326,7 @@ class PredictionApp:
                         self.progress.config(value=total_tiles),
                         messagebox.showinfo(
                             "Success",
-                            f"Prediction completed successfully! Elapsed time: {elapsed_str}",
+                            f"Prediction completed successfully! {total_tiles} tiles completed in: {elapsed_str}",
                         ),
                     ],
                 )

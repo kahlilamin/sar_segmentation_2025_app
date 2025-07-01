@@ -100,6 +100,7 @@ def generate_prediction(
     profile,
     out_prediction_tif: Path,
     models,
+    windows: list[windows.Window],
     tile_size: int = 256,
     stride: int = 256,
     batch_size: int = 4,
@@ -124,9 +125,7 @@ def generate_prediction(
             batch_imgs = []
             batch_windows = []
 
-            for window, _ in get_tiles(
-                vrt, width=cell_width, height=cell_height, stride=stride
-            ):
+            for window in windows:
                 if window.height != cell_height or window.width != cell_width:
                     continue
 
@@ -182,46 +181,3 @@ def generate_prediction(
 
                     if progress_callback:
                         progress_callback()
-
-
-if __name__ == "__main__":
-
-    sar_2024_img_tif = Path.cwd() / "data" / "tif" / "sar_ms_2024_merged.tif"
-    prediction_tif = (
-        Path.cwd() / "data" / "tif" / "combined_models_top3_2024_tr_batch.tif"
-    )
-
-    with rasterio.open(sar_2024_img_tif) as src:
-        profile = get_image_transform_profile(src=src)
-
-        results: list[Result] = []
-
-        for batch_size in [2, 4, 8, 16]:
-            start = time.time()
-
-            prediction_tif = (
-                Path.cwd()
-                / "data"
-                / "tif"
-                / f"combined_models_top3_2024_tr_batch_{batch_size}.tif"
-            )
-
-            generate_prediction(
-                src,
-                profile,
-                prediction_tif,
-                pre_trained_models,
-                tile_size=256,
-                stride=128,
-                batch_size=batch_size,
-                reclassify_values=True,
-            )
-
-            results.append(
-                Result(batch_size=batch_size, processing_time=int(time.time() - start))
-            )
-
-    for result in results:
-        print(
-            f"batch_size= {result.batch_size}, Elapsed: {result.processing_time}s ({result.processing_time / 60}m) "
-        )
