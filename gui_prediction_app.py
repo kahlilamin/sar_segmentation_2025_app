@@ -11,8 +11,10 @@ import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from pathlib import Path
+import webbrowser
 
 import numpy as np
+import tensorflow as tf
 
 import rasterio
 from rasterio.vrt import WarpedVRT
@@ -127,12 +129,6 @@ class PredictionApp:
         self.master.update_idletasks()
 
     def show_about(self):
-        import sys
-        import tensorflow as tf
-        import numpy as np
-        import rasterio
-        import webbrowser
-
         about_win = tk.Toplevel(self.master)
         about_win.title("About")
         about_win.resizable(False, False)
@@ -172,7 +168,6 @@ class PredictionApp:
         tk.Button(about_win, text="Close", command=about_win.destroy).pack(pady=10)
 
     def validate_input_raster(self, filepath):
-        import rasterio
 
         try:
             with rasterio.open(filepath) as src:
