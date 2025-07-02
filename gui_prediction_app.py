@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import threading
+from datetime import datetime
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from pathlib import Path
@@ -25,12 +26,24 @@ from generate_prediction import (
     PRE_TRAINED_MODELS,
 )
 
-# If running as a PyInstaller EXE, include GDAL_PATH
+# If running as a PyInstaller EXE, include GDAL_PATH, PROJ_LIB environment variables
+# and redirect stdout/stderr to log files.
 if getattr(sys, "frozen", False):
     exe_dir = Path(sys._MEIPASS)
     gdal_data_path = exe_dir / "gdal_data"
     os.environ["GDAL_DATA"] = str(gdal_data_path)
     os.environ["PROJ_LIB"] = str(exe_dir / "rasterio" / "proj_data")
+
+    # Redirect stdout and stderr to log files for PyInstaller console=False mode
+    logs_dir = Path.cwd() / "logs"
+    logs_dir.mkdir(exist_ok=True)
+
+    timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+    stdout_path = logs_dir / f"app_stdout_{timestamp_str}.log"
+    stderr_path = logs_dir / f"app_stderr_{timestamp_str}.log"
+
+    sys.stdout = stdout_path.open("w")
+    sys.stderr = stderr_path.open("w")
 
 
 class PredictionApp:
@@ -302,7 +315,13 @@ class PredictionApp:
                         nonlocal processed_tiles
                         processed_tiles += 1
                         self.master.after(
-                            0, lambda: self.progress.config(value=processed_tiles)
+                            0,
+                            lambda: [
+                                self.progress.config(value=processed_tiles),
+                                self.update_status(
+                                    f"Processing... {processed_tiles}/{total_tiles} ({processed_tiles/total_tiles:.2%})"
+                                ),
+                            ],
                         )
 
                     profile = src.profile.copy()
