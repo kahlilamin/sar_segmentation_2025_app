@@ -1,4 +1,4 @@
-__version__ = "2.0.0"
+__version__ = "2.5.0"
 __app_name__ = "Vegetation Prediction App"
 __author__ = "Kahlil Amin"
 __email__ = "kaamin@rivco.org"
@@ -18,7 +18,6 @@ import numpy as np
 import tensorflow as tf
 
 import rasterio
-from rasterio.vrt import WarpedVRT
 
 from generate_prediction import (
     generate_prediction,
@@ -76,16 +75,49 @@ class PredictionApp:
             row=1, column=2
         )
 
-        # Batch Size
-        tk.Label(master, text="Batch Size:").grid(row=2, column=0, sticky="e")
-        tk.Spinbox(master, from_=1, to=16, textvariable=self.batch_size, width=5).grid(
-            row=2, column=1, sticky="w"
-        )
+        # Create a frame to hold the horizontal inputs
+        input_frame = tk.Frame(master)
+        input_frame.grid(row=2, column=0, columnspan=4, pady=5, sticky="ew")
 
-        # Reclassify Values Checkbox (same row, right aligned)
+        # Configure grid columns to expand equally
+        input_frame.columnconfigure(0, weight=1)
+        input_frame.columnconfigure(1, weight=1)
+        input_frame.columnconfigure(2, weight=1)
+
+        # Batch Size section
+        batch_frame = tk.Frame(input_frame)
+        batch_frame.grid(row=0, column=0, sticky="ew")
+        tk.Label(batch_frame, text="Batch Size:").pack(side="left")
+        tk.Spinbox(
+            batch_frame, from_=1, to=16, textvariable=self.batch_size, width=5
+        ).pack(side="left")
+
+        # Model Selection Dropdown section
+        model_frame = tk.Frame(input_frame)
+        model_frame.grid(row=0, column=1, sticky="ew")
+
+        self.model_selection = tk.StringVar()
+        self.model_selection.set("Average (Top 3 Models)")
+
+        model_options = ["Average (Top 3 Models)"] + [
+            model.trial_name for model in self.pre_trained_models
+        ]
+
+        self.model_dropdown = ttk.Combobox(
+            model_frame,
+            textvariable=self.model_selection,
+            values=model_options,
+            state="readonly",
+            width=25,
+        )
+        self.model_dropdown.pack(fill="x", padx=5)
+
+        # Reclassify Values Checkbox section
+        reclass_frame = tk.Frame(input_frame)
+        reclass_frame.grid(row=0, column=2, sticky="ew")
         tk.Checkbutton(
-            master, text="Reclassify Values", variable=self.reclassify_values
-        ).grid(row=2, column=1, sticky="e", padx=(80, 0))
+            reclass_frame, text="Reclassify Values", variable=self.reclassify_values
+        ).pack(side="left")
 
         # Progress Bar (moved to row 4)
         self.progress = ttk.Progressbar(
@@ -272,7 +304,20 @@ class PredictionApp:
                 )
 
                 # Load models
-                for model in self.pre_trained_models:
+                selected = self.model_selection.get()
+                if selected == "Average (Top 3 Models)":
+                    models_to_use = self.pre_trained_models
+                else:
+                    models_to_use = [
+                        m for m in self.pre_trained_models if m.trial_name == selected
+                    ]
+                    if not models_to_use:
+                        messagebox.showerror(
+                            "Error", f"Selected model '{selected}' not found."
+                        )
+                        return
+
+                for model in models_to_use:
                     model.load()
 
                 # Start reading file
@@ -330,7 +375,7 @@ class PredictionApp:
                         src,
                         profile,
                         prediction_tif,
-                        self.pre_trained_models,
+                        models_to_use,
                         valid_windows,
                         tile_size=256,
                         stride=128,

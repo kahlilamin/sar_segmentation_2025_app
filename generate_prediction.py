@@ -23,25 +23,13 @@ else:
 
 PRE_TRAINED_MODELS = [
     PreTrainedModel(
-        model_path=base_path
-        / "data"
-        / "models"
-        / "unet_seresnet34_32_256x256_2000_001_hi_aug_dropout"
-        / "saved_model"
+        model_path=base_path / "data" / "models" / "model_1" / "saved_model"
     ),
     PreTrainedModel(
-        model_path=base_path
-        / "data"
-        / "models"
-        / "unet_seresnet34_32_256x256_2000_001_hi_aug_dropout_0.15"
-        / "saved_model"
+        model_path=base_path / "data" / "models" / "model_2" / "saved_model"
     ),
     PreTrainedModel(
-        model_path=base_path
-        / "data"
-        / "models"
-        / "unet_seresnet34_32_256x256_2000_001_med_aug_dropout"
-        / "saved_model"
+        model_path=base_path / "data" / "models" / "model_3" / "saved_model"
     ),
 ]
 

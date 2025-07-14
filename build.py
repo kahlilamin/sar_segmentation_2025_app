@@ -8,6 +8,15 @@ import gui_prediction_app
 version = gui_prediction_app.__version__
 build_name = f"veg_prediction_app_v{version}"
 
+# Remove previous build directories
+dist_dir = Path("dist")
+if dist_dir.exists():
+    shutil.rmtree(dist_dir)
+
+build_dir = Path("build")
+if build_dir.exists():
+    shutil.rmtree(build_dir)
+
 # Build with PyInstaller
 subprocess.run(["pyinstaller", "veg_prediction_app.spec"], check=True)
 

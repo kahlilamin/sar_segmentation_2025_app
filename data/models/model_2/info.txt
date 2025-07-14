@@ -1,0 +1,1 @@
+unet_seresnet34_32_256x256_2000_001_hi_aug_dropout_0.15

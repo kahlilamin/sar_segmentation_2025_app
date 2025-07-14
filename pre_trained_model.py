@@ -14,7 +14,7 @@ class PreTrainedModel:
     Assumptions:
     - Each image tile has shape (4, 256, 256): 4 channels, height, width.
     - The model was trained with a SEResNet34 backbone.
-    - Input expected by the model is shape (None, 256, 256, 4) with float values scaled to [0, 255].
+    - Input expected by the model is shape (None, 256, 256, 4) with integer values scaled to [0, 255].
     """
 
     def __init__(self, model_path: Union[str, Path]) -> None:
@@ -27,6 +27,9 @@ class PreTrainedModel:
         self.model_path = model_path
 
         self._model = None
+
+        # Derive trial_name from parent folder name
+        self.trial_name = Path(model_path).parent.name
 
     def load(self) -> None:
         if self._model is None:
@@ -79,7 +82,7 @@ class PreTrainedModel:
         Run model inference on a single image tile.
 
         Args:
-            img: Image of shape (4, 256, 256)
+            img (np.ndarray): Image of shape (4, 256, 256)
 
         Returns:
             Prediction output from the model

@@ -16,7 +16,7 @@ A desktop application for running vegetation classification predictions on aeria
 ✅ Supports GPU acceleration using DirectML  
 ✅ Displays progress bar and status updates  
 ✅ Input raster validation:
-- Minimum 4 bands
+- 4 bands (Red, Green, Blue, Near Infrared)
 - Pixel size: **0.5 ft**
 - Projected CRS: **California State Plane Zone 6 (EPSG:2230 or EPSG:2875)**
 - Data type: **8-bit or 16-bit integer rasters**
